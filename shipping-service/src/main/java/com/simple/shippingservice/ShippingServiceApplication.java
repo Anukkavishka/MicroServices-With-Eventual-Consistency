@@ -72,11 +72,12 @@ public class ShippingServiceApplication {
 	    	log.info("\n"+orderEvent.getOrder().getOrderId()+"\n"+orderEvent.getOrder().getProName()+"\n"+orderEvent.getOrder().getQty()+"\nOrder Status \t"+orderEvent.getStatus().toString());
 	    	//this is simple hardcoded logic for the stream processing and you 
 	    		
-	    		if(Integer.parseInt(orderEvent.getOrder().getOrderId()) < 5) {
+	    	//if(Integer.parseInt(orderEvent.getOrder().getOrderId()) < 5) {
+	    		if(false) {
 		    	//just to cause success
 		    		orderEvent.setCmdStatus(OrderCMDStatus.CHECKOUT);
-		    		
-		    	}else if(Integer.parseInt(orderEvent.getOrder().getOrderId()) > 5) {
+		    	//	}else if(Integer.parseInt(orderEvent.getOrder().getOrderId()) > 5) {	
+		    	}else if(true) {
 		    	//just to cause failure
 		    		orderEvent.setCmdStatus(OrderCMDStatus.ABORT);	
 		    	}	

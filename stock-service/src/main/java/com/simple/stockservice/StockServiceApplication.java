@@ -84,7 +84,40 @@ public class StockServiceApplication {
 	    	log.info("\n"+orderEvent.getOrder().getOrderId()+"\n"+orderEvent.getOrder().getProName()+"\n"+orderEvent.getOrder().getQty()+"\nOrder Status \t"+orderEvent.getStatus().toString());
 	    	//this is simple hardcoded logic for the stream processing and you 
 	    	//can go depth with this as you please
-	
+	    	
+	    	
+    		Optional<Stock> stockobj=stockService.getStockById(Integer.parseInt(orderEvent.getOrder().getOrderId()));
+    		
+    			
+    		
+	    	if(stockobj.get().getQty() >= orderEvent.getOrder().getQty()) {
+	    		orderEvent.setStatus(OrderEventType.APRROVED);
+	    		
+	    		log.info("reserving the stock and updating the database.......................................");
+				
+				int updatedQty=stockobj.get().getQty()-orderEvent.getOrder().getQty();
+	    		
+	    		stockService.updateStock(new Stock(Integer.parseInt(orderEvent.getOrder().getOrderId()),orderEvent.getOrder().getProName(),updatedQty));
+	    		log.info("\n"+orderEvent.getOrder().getOrderId()+"\n"+orderEvent.getOrder().getProName()+"\n"+orderEvent.getOrder().getQty()+"\nOrder Status \t"+orderEvent.getStatus().toString()+"\nOrder Status \t"+orderEvent.getCmdStatus() +"\nstock service has updated the entity after reserving");
+		    	
+	    		
+				//stockService.addStock(new Stock(orderEvent.getOrder().getOrderId(),orderEvent.getOrder().getProName(),orderEvent.getOrder().getQty()));
+				log.info(orderEvent.getOrder().getOrderId()+"\n available qty for the given product after reservation in stock : "+updatedQty);
+				
+				log.info("\nsending the validated order to the shipping-service.......................................");
+		
+				Message<OrderEvent> orderin=MessageBuilder.withPayload(orderEvent).build();
+				outgngsource.send(orderin);
+				
+				
+	    		
+	    	}else {
+	    		orderEvent.setStatus(OrderEventType.REJECTED);	
+		    	
+	    	}
+	    	
+    		
+	    	/*	
 	    	if(orderEvent.getOrder().getQty()<10) {
 	    		orderEvent.setStatus(OrderEventType.APRROVED);
 	    		
@@ -95,13 +128,20 @@ public class StockServiceApplication {
 	    	
 	    	Message<OrderEvent> orderin=MessageBuilder.withPayload(orderEvent).build();
 			outgngsource.send(orderin);
-			log.info("adding the stock entity to the database.......................................");
 			
-			stockService.addStock(new Stock(orderEvent.getOrder().getOrderId(),orderEvent.getOrder().getProName(),orderEvent.getOrder().getQty()));
-			log.info(orderEvent.getOrder().getOrderId()+"added the stock entity to the database.......................................");
+			log.info("reserving the stock and updating the database.......................................");
 			
-			log.info("sending the validated order to the shipping-service.......................................");
+			int updatedQty=stockobj.get().getQty()-orderEvent.getOrder().getQty();
+    		
+    		stockService.updateStock(new Stock(Integer.parseInt(orderEvent.getOrder().getOrderId()),orderEvent.getOrder().getProName(),updatedQty));
+    		log.info("\n"+orderEvent.getOrder().getOrderId()+"\n"+orderEvent.getOrder().getProName()+"\n"+orderEvent.getOrder().getQty()+"\nOrder Status \t"+orderEvent.getStatus().toString()+"\nOrder Status \t"+orderEvent.getCmdStatus() +"\nstock service has updated the entity after reserving");
+	    	
+    		
+			//stockService.addStock(new Stock(orderEvent.getOrder().getOrderId(),orderEvent.getOrder().getProName(),orderEvent.getOrder().getQty()));
+			log.info(orderEvent.getOrder().getOrderId()+"\nadded the stock entity to the database.......................................");
 			
+			log.info("\nsending the validated order to the shipping-service.......................................");
+			*/
 	    }
 	    
 	    
@@ -120,13 +160,16 @@ public class StockServiceApplication {
 	    		//Stock stockobj=new Stock(orderEvent.getOrder().getOrderId(),orderEvent.getOrder().getProName(),orderEvent.getOrder().getQty());
 	    		log.info("\n"+orderEvent.getOrder().getOrderId()+"\n"+orderEvent.getOrder().getProName()+"\n"+orderEvent.getOrder().getQty()+"\nOrder Status \t"+orderEvent.getStatus().toString()+"\nOrder Status \t"+orderEvent.getCmdStatus() +"the stock is going to be updated with the rollback");
 		    	
-	    		Optional<Stock> prevobj=stockService.getStockById(orderEvent.getOrder().getOrderId());
+	    		Optional<Stock> prevobj=stockService.getStockById(Integer.parseInt(orderEvent.getOrder().getOrderId()));
 	    		int updatedQty=orderEvent.getOrder().getQty()+prevobj.get().getQty();
-	    		//prevobj.setQty(updatedQty);
-			    
-	    		
-	    		stockService.updateStock(new Stock(orderEvent.getOrder().getOrderId(),orderEvent.getOrder().getProName(),updatedQty));
+	    		log.info("changed and updated qty that will be used in the rollback operation :  "+ updatedQty);
+	    		stockService.updateStock(new Stock(Integer.parseInt(orderEvent.getOrder().getOrderId()),orderEvent.getOrder().getProName(),updatedQty));
 	    		log.info("\n"+orderEvent.getOrder().getOrderId()+"\n"+orderEvent.getOrder().getProName()+"\n"+orderEvent.getOrder().getQty()+"\nOrder Status \t"+orderEvent.getStatus().toString()+"\nOrder Status \t"+orderEvent.getCmdStatus() +"the stock has been updated with the rollback");
+		    	
+	    		
+	    	}else {
+	    		
+	    		log.info("\n"+orderEvent.getOrder().getOrderId()+"\n"+orderEvent.getOrder().getProName()+"\n"+orderEvent.getOrder().getQty()+"\nOrder Status \t"+orderEvent.getStatus().toString()+"\nOrder Status \t"+orderEvent.getCmdStatus() +"the order is ready to checkout no rollback to the DB");
 		    	
 	    		
 	    	}

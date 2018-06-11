@@ -1,13 +1,15 @@
 package com.simple.stockservice.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
 public class Stock {
 	
 	@Id
-	private String stockId;
+	private int stockId;
 	private String proName;
 	private int qty;
 	
@@ -20,7 +22,7 @@ public class Stock {
 
 
 
-	public Stock(String stockId, String proName, int qty) {
+	public Stock(int stockId, String proName, int qty) {
 		super();
 		this.stockId = stockId;
 		this.proName = proName;
@@ -29,13 +31,13 @@ public class Stock {
 
 
 
-	public String getStockId() {
+	public int getStockId() {
 		return stockId;
 	}
 
 
 
-	public void setStockId(String stockId) {
+	public void setStockId(int stockId) {
 		this.stockId = stockId;
 	}
 

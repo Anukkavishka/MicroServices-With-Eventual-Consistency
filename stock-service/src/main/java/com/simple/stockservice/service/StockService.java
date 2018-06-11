@@ -25,8 +25,9 @@ public class StockService {
 	}
 
 	
-	public Optional<Stock> getStockById(String stockId) {
+	public Optional<Stock> getStockById(int stockId) {
 		Optional<Stock> obj = stockRepo.findById(stockId);
+		//Stock obj = stockRepo.getOne(stockId);
 		return obj;
 	}	
 	
